@@ -40,8 +40,8 @@ ALLOWED_HOSTS_ENV = os.getenv('ALLOWED_HOSTS', '')
 if ALLOWED_HOSTS_ENV:
     ALLOWED_HOSTS = [h.strip() for h in ALLOWED_HOSTS_ENV.split(',') if h.strip()]
 else:
-    # Default allowed hosts for local development
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+    # Default allowed hosts - include common patterns
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.up.railway.app', '.railway.app']
 
 # Also allow Railway's default domain pattern
 import socket
