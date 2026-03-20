@@ -1,0 +1,58 @@
+{
+  "id": "railway-production-env",
+  "name": "Railway Production",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "https://onlinequizbackendapi-production.up.railway.app",
+      "enabled": true
+    },
+    {
+      "key": "admin_username",
+      "value": "admin",
+      "enabled": true
+    },
+    {
+      "key": "admin_password",
+      "value": "admin123",
+      "enabled": true
+    },
+    {
+      "key": "test_user_username",
+      "value": "testuser",
+      "enabled": true
+    },
+    {
+      "key": "test_user_password",
+      "value": "testpass123",
+      "enabled": true
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "user_token",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "quiz_id",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "question_id",
+      "value": "",
+      "enabled": true
+    }
+  ],
+  "timestamp": "2026-03-20T09:00:00.000Z",
+  "version": "1.0.0"
+}
