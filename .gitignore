@@ -1,0 +1,95 @@
+# ============================================
+# Django Python
+# ============================================
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Media files (uploads)
+media/
+uploads/
+
+# Static files (collectstatic)
+staticfiles/
+static/
+!static/images/
+
+# Test/Coverage
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.pytest_cache/
+.mypy_cache/
+
+# Node (for npm/newman)
+node_modules/
+package-lock.json
+
+# Environment variables (sensitive!)
+.env
+.env.local
+.env.*.local
+
+# Test reports
+test-reports/
+newman-report/
+*.html
+
+# Docker
+.dockerignore
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Database (local)
+*.sqlite3
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Secrets (never commit!)
+*.pem
+*.key
+credentials.json
