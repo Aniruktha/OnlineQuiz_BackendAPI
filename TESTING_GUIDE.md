@@ -1,6 +1,5 @@
 # Complete Postman Testing Guide for Quiz API
 
-> **For:** Complete Beginner  
 > **API Style:** LeetCode-like (Admin creates quizzes, Users take them)
 
 ---
@@ -10,13 +9,9 @@
 Follow these steps in order for your first test. After this, you can run automated tests.
 
 ### Step 1: Make Sure Server is Running
-```cmd
-cd c:\Users\aniruktha\Documents\onlineQuizz\quiz_api
-python manage.py runserver
-```
 > Server runs at: http://127.0.0.1:8000
 
-### Step 2: Clear Database (Fresh Start)
+### Step 2: Clear Database (Fresh Start - if needed)
 ```cmd
 python manage.py flush --noinput
 ```
@@ -166,9 +161,6 @@ Before starting, make sure:
 
 1. Open **Command Prompt** (cmd)
 2. Navigate to the project:
-   ```cmd
-   cd c:\Users\aniruktha\Documents\onlineQuizz\quiz_api
-   ```
 3. Run the server:
    ```cmd
    python manage.py runserver
@@ -243,7 +235,6 @@ Since only admins can create quizzes, let's create one:
 1. Open **new command prompt** (keep server running)
 2. Run:
    ```cmd
-   cd c:\Users\aniruktha\Documents\onlineQuizz\quiz_api
    python manage.py shell
    ```
 3. In shell, type:
@@ -539,18 +530,6 @@ To properly test leaderboards:
 | "401 Unauthorized" | Token expired. Login again to get new token |
 | "403 Forbidden" | You need admin token for that endpoint |
 | "404 Not Found" | Check URL has trailing slash `/` |
-| "Quiz creation failed" | Add Gemini API key to `.env` |
+| "Quiz creation failed" | Add API key to `.env` |
 
 ---
-
-## 🎉 Congratulations!
-
-You've tested a complete **LeetCode-style Quiz API** with:
-- ✅ Admin creates quizzes on topics
-- ✅ Users take quizzes
-- ✅ Topic-based ELO rankings
-- ✅ Global and topic leaderboards
-- ✅ JWT Authentication
-- ✅ AI-powered quiz generation
-
-Great job for a beginner! 🚀
