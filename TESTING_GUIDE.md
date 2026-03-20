@@ -1,6 +1,5 @@
 # Complete Postman Testing Guide for Quiz API
 
-> **Created by:** Senior Backend Developer  
 > **For:** Complete Beginner  
 > **API Style:** LeetCode-like (Admin creates quizzes, Users take them)
 
