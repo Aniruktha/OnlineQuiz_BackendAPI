@@ -34,7 +34,23 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-m6tt-hsbn4v=$%z^a_mfc4$2-q
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',') if os.getenv('ALLOWED_HOSTS') else []
+# Handle ALLOWED_HOSTS for both local and Railway deployment
+# Railway provides a .railway.app domain
+ALLOWED_HOSTS_ENV = os.getenv('ALLOWED_HOSTS', '')
+if ALLOWED_HOSTS_ENV:
+    ALLOWED_HOSTS = [h.strip() for h in ALLOWED_HOSTS_ENV.split(',') if h.strip()]
+else:
+    # Default allowed hosts for local development
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+# Also allow Railway's default domain pattern
+import socket
+try:
+    hostname = socket.gethostname()
+    if hostname:
+        ALLOWED_HOSTS.append(hostname)
+except:
+    pass
 
 
 #registering
@@ -104,25 +120,39 @@ WSGI_APPLICATION = 'quiz_api.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 # Check for Railway's DATABASE_URL or use local PostgreSQL
-DATABASE_URL = os.getenv('DATABASE_URL')
+# Priority: Railway DATABASE_URL > local .env variables
+import dj_database_url
+
+# Try Railway's DATABASE_URL first (it always uses TCP, not sockets)
+DATABASE_URL = os.getenv('DATABASE_URL', '').strip()
 
 if DATABASE_URL:
     # Parse Railway's DATABASE_URL format: postgres://user:pass@host:port/db
-    import dj_database_url
     DATABASES = {
-        'default': dj_database_url.parse(DATABASE_URL)
+        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=60)
     }
 else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME'),
-            'USER': os.getenv('DB_USER'),
-            'PASSWORD': os.getenv('DB_PASSWORD'),
-            'HOST': os.getenv('DB_HOST'),
-            'PORT': os.getenv('DB_PORT'),
+    # Fallback to local PostgreSQL configuration
+    DB_ENGINE = os.getenv('DB_ENGINE', 'django.db.backends.postgresql')
+    
+    if DB_ENGINE == 'sqlite':
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
         }
-    }
+    else:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': os.getenv('DB_NAME', 'quizdb'),
+                'USER': os.getenv('DB_USER', 'postgres'),
+                'PASSWORD': os.getenv('DB_PASSWORD', ''),
+                'HOST': os.getenv('DB_HOST', '127.0.0.1'),
+                'PORT': os.getenv('DB_PORT', '5432'),
+            }
+        }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
