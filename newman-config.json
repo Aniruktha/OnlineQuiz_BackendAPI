@@ -1,0 +1,47 @@
+{
+  "collection": "./postman_collection.json",
+  "environment": "./postman_environment.json",
+  "globals": {
+    "id": "quiz-api-globals",
+    "name": "Quiz API Globals",
+    "values": [
+      {
+        "key": "base_url",
+        "value": "http://127.0.0.1:8000",
+        "type": "string",
+        "enabled": true
+      }
+    ]
+  },
+  "iterationCount": 1,
+  "folder": [],
+  "delayRequest": 500,
+  "timeoutRequest": 10000,
+  "insecure": true,
+  "tls": false,
+  "cookies": [],
+  "output": [
+    {
+      "name": "test-report",
+      "format": "json",
+      "export": "./test-reports/report.json"
+    },
+    {
+      "name": "test-report",
+      "format": "html",
+      "export": "./test-reports/report.html"
+    }
+  ],
+  "reporter": {
+    "cli": {
+      "verbose": true,
+      "silent": false
+    },
+    "json": {
+      "verbose": true
+    },
+    "html": {
+      "verbose": true
+    }
+  }
+}

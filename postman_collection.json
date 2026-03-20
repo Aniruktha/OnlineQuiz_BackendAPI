@@ -1,0 +1,713 @@
+{
+  "info": {
+    "name": "Quiz API - Automated Tests",
+    "description": "Automated test collection for Quiz API with pre-request and test scripts",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "quiz_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "attempt_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "question_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "option_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Setup - Create Admin User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Admin user created or already exists', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('message');",
+              "    pm.expect(jsonData.message).to.match(/success|already exists|created/i);",
+              "});",
+              "",
+              "pm.test('Response time is acceptable', function() {",
+              "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/users/register/",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"username\": \"admin\",\n    \"email\": \"admin@quiz.com\",\n    \"password\": \"admin123\"\n}"
+        }
+      }
+    },
+    {
+      "name": "03 - Admin - Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login successful with access token', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('access');",
+              "    pm.expect(jsonData).to.have.property('refresh');",
+              "    pm.environment.set('admin_token', jsonData.access);",
+              "    pm.environment.set('admin_refresh_token', jsonData.refresh);",
+              "});",
+              "",
+              "pm.test('Access token is not empty', function() {",
+              "    pm.expect(pm.response.json().access).to.not.be.empty;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/token/",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin123\"\n}"
+        }
+      }
+    },
+    {
+      "name": "04 - Admin - Create Quiz",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Quiz created successfully', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.environment.set('quiz_id', jsonData.id);",
+              "});",
+              "",
+              "pm.test('Quiz has topic assigned', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('topic');",
+              "});",
+              "",
+              "pm.test('Response status is 201 or 200', function() {",
+              "    pm.expect(pm.response.status).to.be.oneOf([200, 201]);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/quizzes/",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"topic\": \"Python\",\n    \"question_count\": 3,\n    \"difficulty\": \"easy\"\n}"
+        }
+      }
+    },
+    {
+      "name": "05 - Register Regular User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('User registration successful', function() {",
+              "    pm.expect(pm.response.json()).to.have.property('message');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/users/register/",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"testuser@quiz.com\",\n    \"password\": \"testpass123\"\n}"
+        }
+      }
+    },
+    {
+      "name": "06 - User - Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('User login successful', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('access');",
+              "    pm.expect(jsonData).to.have.property('refresh');",
+              "    pm.environment.set('user_token', jsonData.access);",
+              "    pm.environment.set('user_refresh_token', jsonData.refresh);",
+              "});",
+              "",
+              "pm.test('Tokens are different from admin', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.access).to.not.equal(pm.environment.get('admin_token'));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/token/",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"username\": \"testuser\",\n    \"password\": \"testpass123\"\n}"
+        }
+      }
+    },
+    {
+      "name": "07 - User - List Quizzes",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('List quizzes returns array', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "});",
+              "",
+              "pm.test('Quizzes have required fields', function() {",
+              "    var jsonData = pm.response.json();",
+              "    if (jsonData.length > 0) {",
+              "        pm.expect(jsonData[0]).to.have.property('id');",
+              "        pm.expect(jsonData[0]).to.have.property('topic');",
+              "    }",
+              "});",
+              "",
+              "pm.test('Response is 200 OK', function() {",
+              "    pm.expect(pm.response.status).to.be.oneOf([200, 201]);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/quizzes/",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user_token}}"
+          }
+        ]
+      }
+    },
+    {
+      "name": "08 - User - Get Quiz Questions",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Questions retrieved successfully', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "});",
+              "",
+              "pm.test('Questions have options', function() {",
+              "    var jsonData = pm.response.json();",
+              "    if (jsonData.length > 0) {",
+              "        pm.expect(jsonData[0]).to.have.property('options');",
+              "        // Store first question and option IDs for testing",
+              "        if (jsonData[0].options.length > 0) {",
+              "            pm.environment.set('question_id', jsonData[0].id);",
+              "            pm.environment.set('option_id', jsonData[0].options[0].id);",
+              "        }",
+              "    }",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/quizzes/{{quiz_id}}/questions/",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user_token}}"
+          }
+        ]
+      }
+    },
+    {
+      "name": "09 - User - Start Quiz Attempt",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Quiz attempt started', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('attempt_id');",
+              "    pm.environment.set('attempt_id', jsonData.attempt_id);",
+              "});",
+              "",
+              "pm.test('Attempt has quiz reference', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('quiz');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/core/quiz/{{quiz_id}}/start/",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      }
+    },
+    {
+      "name": "10 - User - Submit Answer",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Answer submitted successfully', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('is_correct');",
+              "});",
+              "",
+              "pm.test('Response includes feedback', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('correct_answer');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/core/attempt/{{attempt_id}}/answer/",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"question_id\": {{question_id}},\n    \"selected_option_id\": {{option_id}}\n}"
+        }
+      }
+    },
+    {
+      "name": "11 - User - Submit Quiz",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Quiz submitted successfully', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('score');",
+              "    pm.expect(jsonData).to.have.property('status');",
+              "    pm.expect(jsonData.status).to.equal('completed');",
+              "});",
+              "",
+              "pm.test('Score is calculated correctly', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('total_questions');",
+              "    pm.expect(jsonData).to.have.property('correct_answers');",
+              "});",
+              "",
+              "pm.test('Response time is acceptable', function() {",
+              "    pm.expect(pm.response.responseTime).to.be.below(3000);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/core/attempt/{{attempt_id}}/submit/",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user_token}}"
+          }
+        ]
+      }
+    },
+    {
+      "name": "12 - User - Get Stats",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Stats retrieved successfully', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('total_attempts');",
+              "    pm.expect(jsonData).to.have.property('avg_score');",
+              "    pm.expect(jsonData).to.have.property('elo_points');",
+              "});",
+              "",
+              "pm.test('ELO points updated after quiz', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.elo_points).to.be.above(0);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/analytics/stats/",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user_token}}"
+          }
+        ]
+      }
+    },
+    {
+      "name": "13 - User - Get Topic Stats",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Topic stats retrieved', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('total_attempts');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{base_url}}/api/analytics/stats/?topic=Python",
+          "query": [
+            {
+              "key": "topic",
+              "value": "Python"
+            }
+          ]
+        },
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user_token}}"
+          }
+        ]
+      }
+    },
+    {
+      "name": "14 - Get Leaderboard",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Leaderboard retrieved', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "});",
+              "",
+              "pm.test('Leaderboard includes user info', function() {",
+              "    var jsonData = pm.response.json();",
+              "    if (jsonData.length > 0) {",
+              "        pm.expect(jsonData[0]).to.have.property('username');",
+              "        pm.expect(jsonData[0]).to.have.property('elo_points');",
+              "    }",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/analytics/leaderboard/",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user_token}}"
+          }
+        ]
+      }
+    },
+    {
+      "name": "15 - Get Topic Leaderboard",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Topic leaderboard retrieved', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/analytics/leaderboard/Python/",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user_token}}"
+          }
+        ]
+      }
+    },
+    {
+      "name": "16 - List Topics",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Topics list retrieved', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('topics');",
+              "    pm.expect(jsonData.topics).to.be.an('array');",
+              "});",
+              "",
+              "pm.test('Python topic exists', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.topics).to.include('Python');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/analytics/topics/",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user_token}}"
+          }
+        ]
+      }
+    },
+    {
+      "name": "17 - Get Quiz History",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Quiz history retrieved', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "});",
+              "",
+              "pm.test('History includes attempt info', function() {",
+              "    var jsonData = pm.response.json();",
+              "    if (jsonData.length > 0) {",
+              "        pm.expect(jsonData[0]).to.have.property('score');",
+              "        pm.expect(jsonData[0]).to.have.property('status');",
+              "    }",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/analytics/history/",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user_token}}"
+          }
+        ]
+      }
+    },
+    {
+      "name": "18 - Unauthorized Access Test",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Unauthorized request returns 401', function() {",
+              "    pm.expect(pm.response.status).to.equal(401);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/quizzes/"
+      }
+    },
+    {
+      "name": "19 - Invalid Token Test",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Invalid token returns 401', function() {",
+              "    pm.expect(pm.response.status).to.be.oneOf([401, 403]);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/api/quizzes/",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer invalid_token_here"
+          }
+        ]
+      }
+    },
+    {
+      "name": "20 - Create Another Quiz (Admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Second quiz created', function() {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.expect(jsonData.topic).to.equal('JavaScript');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/quizzes/",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"topic\": \"JavaScript\",\n    \"question_count\": 3,\n    \"difficulty\": \"medium\"\n}"
+        }
+      }
+    }
+  ]
+}

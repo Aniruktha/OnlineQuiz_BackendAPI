@@ -1,0 +1,246 @@
+[
+  {
+    "test_name": "Admin User Registration",
+    "username": "admin_user",
+    "email": "admin@test.com",
+    "password": "admin123",
+    "is_admin": true,
+    "expected_status": 200,
+    "description": "Register an admin user"
+  },
+  {
+    "test_name": "Regular User Registration",
+    "username": "john_doe",
+    "email": "john@test.com",
+    "password": "password123",
+    "is_admin": false,
+    "expected_status": 200,
+    "description": "Register a regular test user"
+  },
+  {
+    "test_name": "Duplicate Username Registration",
+    "username": "john_doe",
+    "email": "john2@test.com",
+    "password": "password123",
+    "is_admin": false,
+    "expected_status": 400,
+    "description": "Try registering with existing username"
+  },
+  {
+    "test_name": "Invalid Email Registration",
+    "username": "new_user",
+    "email": "not-an-email",
+    "password": "password123",
+    "is_admin": false,
+    "expected_status": 400,
+    "description": "Try registering with invalid email"
+  },
+  {
+    "test_name": "Short Password Registration",
+    "username": "short_pass_user",
+    "email": "short@test.com",
+    "password": "123",
+    "is_admin": false,
+    "expected_status": 400,
+    "description": "Try registering with short password"
+  },
+  {
+    "test_name": "Admin Login",
+    "username": "admin_user",
+    "password": "admin123",
+    "expected_status": 200,
+    "token_type": "access",
+    "description": "Login as admin user"
+  },
+  {
+    "test_name": "User Login",
+    "username": "john_doe",
+    "password": "password123",
+    "expected_status": 200,
+    "token_type": "access",
+    "description": "Login as regular user"
+  },
+  {
+    "test_name": "Wrong Password Login",
+    "username": "john_doe",
+    "password": "wrongpassword",
+    "expected_status": 401,
+    "description": "Try login with wrong password"
+  },
+  {
+    "test_name": "Non-existent User Login",
+    "username": "nonexistent_user",
+    "password": "password123",
+    "expected_status": 401,
+    "description": "Try login with non-existent user"
+  },
+  {
+    "test_name": "Create Python Quiz",
+    "topic": "Python Basics",
+    "question_count": 3,
+    "difficulty": "easy",
+    "expected_status": 201,
+    "description": "Admin creates a Python quiz"
+  },
+  {
+    "test_name": "Create JavaScript Quiz",
+    "topic": "JavaScript Fundamentals",
+    "question_count": 5,
+    "difficulty": "medium",
+    "expected_status": 201,
+    "description": "Admin creates a JavaScript quiz"
+  },
+  {
+    "test_name": "Create Data Structures Quiz",
+    "topic": "Data Structures",
+    "question_count": 4,
+    "difficulty": "hard",
+    "expected_status": 201,
+    "description": "Admin creates a hard Data Structures quiz"
+  },
+  {
+    "test_name": "Create Quiz Invalid Topic",
+    "topic": "",
+    "question_count": 3,
+    "difficulty": "easy",
+    "expected_status": 400,
+    "description": "Try creating quiz with empty topic"
+  },
+  {
+    "test_name": "User Create Quiz (Forbidden)",
+    "topic": "Unauthorized Quiz",
+    "question_count": 3,
+    "difficulty": "easy",
+    "expected_status": 403,
+    "user_role": "regular",
+    "description": "Regular user tries to create quiz (should fail)"
+  },
+  {
+    "test_name": "List All Quizzes",
+    "expected_min_count": 1,
+    "expected_status": 200,
+    "required_fields": ["id", "topic"],
+    "description": "Get list of all available quizzes"
+  },
+  {
+    "test_name": "Get Quiz Questions",
+    "expected_min_count": 1,
+    "expected_status": 200,
+    "required_fields": ["id", "text", "options"],
+    "description": "Get questions for a quiz"
+  },
+  {
+    "test_name": "Start Quiz Attempt",
+    "expected_status": 200,
+    "required_fields": ["attempt_id", "quiz"],
+    "description": "Start a new quiz attempt"
+  },
+  {
+    "test_name": "Submit Answer with option_id",
+    "question_id_field": "question_id",
+    "option_id_field": "option_id",
+    "expected_status": 200,
+    "required_fields": ["is_correct"],
+    "description": "Submit answer using option_id field"
+  },
+  {
+    "test_name": "Submit Answer with selected_option_id",
+    "question_id_field": "question_id",
+    "option_id_field": "selected_option_id",
+    "expected_status": 200,
+    "required_fields": ["is_correct"],
+    "description": "Submit answer using selected_option_id field"
+  },
+  {
+    "test_name": "Submit Answer Missing Fields",
+    "expected_status": 400,
+    "description": "Submit answer without required fields"
+  },
+  {
+    "test_name": "Submit Quiz",
+    "expected_status": 200,
+    "required_fields": ["score", "status", "total_questions", "correct_answers"],
+    "expected_status_value": "completed",
+    "description": "Complete and submit a quiz"
+  },
+  {
+    "test_name": "Get User Stats",
+    "expected_status": 200,
+    "required_fields": ["total_attempts", "avg_score", "elo_points"],
+    "description": "Get user statistics"
+  },
+  {
+    "test_name": "Get Topic Stats",
+    "topic": "Python Basics",
+    "expected_status": 200,
+    "required_fields": ["total_attempts", "avg_score"],
+    "description": "Get stats for specific topic"
+  },
+  {
+    "test_name": "Get Global Leaderboard",
+    "expected_status": 200,
+    "expected_min_count": 1,
+    "required_fields": ["username", "elo_points", "rank"],
+    "description": "Get global leaderboard"
+  },
+  {
+    "test_name": "Get Topic Leaderboard",
+    "topic": "Python Basics",
+    "expected_status": 200,
+    "required_fields": ["leaderboard"],
+    "description": "Get topic-specific leaderboard"
+  },
+  {
+    "test_name": "List Topics",
+    "expected_status": 200,
+    "required_fields": ["topics"],
+    "description": "Get list of all available topics"
+  },
+  {
+    "test_name": "Get Quiz History",
+    "expected_status": 200,
+    "description": "Get user's quiz history"
+  },
+  {
+    "test_name": "Filter History by Topic",
+    "topic": "Python Basics",
+    "expected_status": 200,
+    "description": "Filter quiz history by topic"
+  },
+  {
+    "test_name": "Paginated Quiz History",
+    "page": 2,
+    "expected_status": 200,
+    "description": "Get paginated quiz history"
+  },
+  {
+    "test_name": "Unauthorized Access",
+    "expected_status": 401,
+    "description": "Access protected endpoint without token"
+  },
+  {
+    "test_name": "Invalid Token Access",
+    "expected_status": 401,
+    "description": "Access with invalid token"
+  },
+  {
+    "test_name": "Access Non-existent Quiz",
+    "quiz_id": 99999,
+    "expected_status": 404,
+    "description": "Try to access non-existent quiz"
+  },
+  {
+    "test_name": "Submit Answer Without Starting Quiz",
+    "attempt_id": 99999,
+    "question_id": 1,
+    "option_id": 1,
+    "expected_status": 404,
+    "description": "Try to submit answer without starting attempt"
+  },
+  {
+    "test_name": "Get Invalid Quiz Questions",
+    "quiz_id": 99999,
+    "expected_status": 404,
+    "description": "Try to get questions for non-existent quiz"
+  }
+]

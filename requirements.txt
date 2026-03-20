@@ -1,0 +1,14 @@
+Django
+djangorestframework
+psycopg2-binary
+python-dotenv
+redis
+django-redis
+djangorestframework-simplejwt
+celery
+drf-yasg
+pytest
+pytest-django
+django-cors-headers
+requests
+dj-database-url

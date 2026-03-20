@@ -1,0 +1,564 @@
+{
+  "info": {
+    "name": "Quiz API - Data Driven Tests",
+    "description": "Data-driven test collection using test_data.json for comprehensive API testing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "User Registration Tests",
+      "item": [
+        {
+          "name": "Register - {{test_name}}",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const testData = pm.iterationData.get('testData');",
+                  "",
+                  "pm.test('Status code is ' + testData.expected_status, function() {",
+                  "    pm.response.to.have.status(testData.expected_status);",
+                  "});",
+                  "",
+                  "if (testData.expected_status === 200) {",
+                  "    pm.test('User created successfully', function() {",
+                  "        pm.expect(pm.response.json()).to.have.property('message');",
+                  "    });",
+                  "    // Store username for cleanup",
+                  "    pm.environment.set('last_registered_user', testData.username);",
+                  "}",
+                  "",
+                  "if (testData.expected_status === 400) {",
+                  "    pm.test('Error response received', function() {",
+                  "        const jsonData = pm.response.json();",
+                  "        pm.expect(jsonData).to.have.property('error')",
+                  "            .or(pm.response.json()).to.have.property('message');",
+                  "    });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const testData = pm.iterationData.get('testData');",
+                  "const reqBody = {",
+                  "    username: testData.username,",
+                  "    email: testData.email,",
+                  "    password: testData.password",
+                  "};",
+                  "pm.request.body.raw = JSON.stringify(reqBody);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/users/register/",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login Tests",
+      "item": [
+        {
+          "name": "Login - {{test_name}}",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const testData = pm.iterationData.get('testData');",
+                  "",
+                  "pm.test('Status code is ' + testData.expected_status, function() {",
+                  "    pm.response.to.have.status(testData.expected_status);",
+                  "});",
+                  "",
+                  "if (testData.expected_status === 200) {",
+                  "    pm.test('Login successful with tokens', function() {",
+                  "        const jsonData = pm.response.json();",
+                  "        pm.expect(jsonData).to.have.property('access');",
+                  "        pm.expect(jsonData).to.have.property('refresh');",
+                  "        // Store tokens based on user role",
+                  "        if (testData.username === 'admin_user') {",
+                  "            pm.environment.set('admin_token', jsonData.access);",
+                  "        } else {",
+                  "            pm.environment.set('user_token', jsonData.access);",
+                  "        }",
+                  "    });",
+                  "}",
+                  "",
+                  "if (testData.expected_status === 401) {",
+                  "    pm.test('Login failed as expected', function() {",
+                  "        pm.expect(pm.response.json()).to.have.property('detail');",
+                  "    });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const testData = pm.iterationData.get('testData');",
+                  "const reqBody = {",
+                  "    username: testData.username,",
+                  "    password: testData.password",
+                  "};",
+                  "pm.request.body.raw = JSON.stringify(reqBody);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/token/",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Quiz Creation Tests",
+      "item": [
+        {
+          "name": "Create Quiz - {{test_name}}",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const testData = pm.iterationData.get('testData');",
+                  "",
+                  "pm.test('Status code is ' + testData.expected_status, function() {",
+                  "    pm.response.to.have.status(testData.expected_status);",
+                  "});",
+                  "",
+                  "if (testData.expected_status === 201) {",
+                  "    pm.test('Quiz created with correct topic', function() {",
+                  "        const jsonData = pm.response.json();",
+                  "        pm.expect(jsonData).to.have.property('id');",
+                  "        pm.expect(jsonData.topic).to.equal(testData.topic);",
+                  "        pm.environment.set('quiz_id', jsonData.id);",
+                  "    });",
+                  "}",
+                  "",
+                  "if (testData.expected_status === 403) {",
+                  "    pm.test('Forbidden as expected for regular user', function() {",
+                  "        pm.expect(pm.response.json()).to.have.property('detail');",
+                  "    });",
+                  "}",
+                  "",
+                  "if (testData.expected_status === 400) {",
+                  "    pm.test('Bad request validation error', function() {",
+                  "        pm.expect(pm.response.json()).to.have.property('topic');",
+                  "    });",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const testData = pm.iterationData.get('testData');",
+                  "const reqBody = {",
+                  "    topic: testData.topic,",
+                  "    question_count: testData.question_count,",
+                  "    difficulty: testData.difficulty",
+                  "};",
+                  "pm.request.body.raw = JSON.stringify(reqBody);",
+                  "",
+                  "const authToken = testData.user_role === 'regular' ",
+                  "    ? pm.environment.get('user_token') ",
+                  "    : pm.environment.get('admin_token');",
+                  "pm.request.headers.upsert({key: 'Authorization', value: 'Bearer ' + authToken});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/quizzes/",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Quiz Operations Tests",
+      "item": [
+        {
+          "name": "List Quizzes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const testData = { expected_min_count: 1, expected_status: 200, required_fields: ['id', 'topic'] };",
+                  "",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('At least one quiz exists', function() {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.length).to.be.at.least(testData.expected_min_count);",
+                  "});",
+                  "",
+                  "pm.test('Quizzes have required fields', function() {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.length > 0) {",
+                  "        testData.required_fields.forEach(function(field) {",
+                  "            pm.expect(jsonData[0]).to.have.property(field);",
+                  "        });",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/quizzes/",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Get Quiz Questions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Questions retrieved successfully', function() {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "});",
+                  "",
+                  "pm.test('Questions have options', function() {",
+                  "    const jsonData = pm.response.json();",
+                  "    if (jsonData.length > 0) {",
+                  "        pm.expect(jsonData[0]).to.have.property('options');",
+                  "        if (jsonData[0].options.length > 0) {",
+                  "            pm.environment.set('question_id', jsonData[0].id);",
+                  "            pm.environment.set('option_id', jsonData[0].options[0].id);",
+                  "        }",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/quizzes/{{quiz_id}}/questions/",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Quiz Attempt Tests",
+      "item": [
+        {
+          "name": "Start Quiz Attempt",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Quiz attempt started', function() {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('attempt_id');",
+                  "    pm.environment.set('attempt_id', jsonData.attempt_id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/core/quiz/{{quiz_id}}/start/",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          }
+        },
+        {
+          "name": "Submit Answer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Answer submitted', function() {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('is_correct');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/core/attempt/{{attempt_id}}/answer/",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"question_id\": {{question_id}},\n    \"option_id\": {{option_id}}\n}"
+            }
+          }
+        },
+        {
+          "name": "Submit Quiz",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Quiz submitted with score', function() {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('score');",
+                  "    pm.expect(jsonData.status).to.equal('completed');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/core/attempt/{{attempt_id}}/submit/",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics Tests",
+      "item": [
+        {
+          "name": "Get User Stats",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Stats retrieved', function() {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('elo_points');",
+                  "    pm.expect(jsonData).to.have.property('total_attempts');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/analytics/stats/",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Get Global Leaderboard",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Leaderboard retrieved', function() {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/analytics/leaderboard/",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ]
+          }
+        },
+        {
+          "name": "List Topics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Topics list retrieved', function() {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('topics');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/analytics/topics/",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Security Tests",
+      "item": [
+        {
+          "name": "Unauthorized Access Test",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Returns 401 for unauthenticated request', function() {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/quizzes/"
+          }
+        },
+        {
+          "name": "Invalid Token Test",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Returns 401 for invalid token', function() {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/quizzes/",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer invalid_token_12345"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
